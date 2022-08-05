@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QScopedPointer>
+#include <QThreadPool>
 #include "task.h"
 
 
@@ -28,24 +29,36 @@ int main(int argc, char *argv[])
     //setando o nome do thread atual como "Main Thread"
     QThread::currentThread()->setObjectName("Main Thread");
     //criando um novo QThread e setando o nome dele
-    QThread worker;
-    worker.setObjectName("Worker Thread");
+//    QThread worker;
+//    worker.setObjectName("Worker Thread");
 
     //Main thread
     qInfo() << "Starting work" << QThread::currentThread();
     //Task *task = new Task(&a); vai dar problema se mover de thread
     //Criando um ptr para Task
-    QScopedPointer<Task> t(new Task()); //Auto-delete
-    //Retorna o valor do ponteiro referênciado por esse obj (QScopedPointer) e joga em um ptr de Task
-    Task *task = t.data();
-    //Muda o thread do obj e de suas children. Não pode ser feito se tiver um parent.
-    t->moveToThread(&worker);
-    //Um signal de QThread::started é emitido quando começa a ser executado e esse
-    //signal é enviado para o slot work de Task.
-    worker.connect(&worker, &QThread::started, task, &Task::work);
+//    QScopedPointer<Task> t(new Task()); //Auto-delete
+//    //Retorna o valor do ponteiro referênciado por esse obj (QScopedPointer) e joga em um ptr de Task
+//    Task *task = t.data();
+//    //Muda o thread do obj e de suas children. Não pode ser feito se tiver um parent.
+//    t->moveToThread(&worker);
+//    //Um signal de QThread::started é emitido quando começa a ser executado e esse
+//    //signal é enviado para o slot work de Task.
+//    worker.connect(&worker, &QThread::started, task, &Task::work);
 
-    //aqui começa a execução
-    worker.start();
+//    //aqui começa a execução
+//    worker.start();
+    //Part 3 - QThreadPool
+    qInfo() << "Max Threads" << QThreadPool::globalInstance()->maxThreadCount();
+
+    for(int i = 0; i < 50; i++)
+    {
+        Task *task = new Task();
+        //QThreadPool vai se tornar owner desse obj e depois auto-deletar qnd não for útil
+        task->setAutoDelete(true);
+        //quando estiver pronto para ser rodado vai chamar o run
+        QThreadPool::globalInstance()->start(task);
+    }
+
     qInfo() << "Free to do other things..." << QThread::currentThread();
 
     return a.exec();

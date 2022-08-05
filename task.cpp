@@ -11,7 +11,7 @@ Task::~Task()
     qInfo() << "Deconstructed " << this << " on: " << QThread::currentThread();
 }
 
-void Task::work()
+void Task::run()
 {
     //sinaliza qual thread está sendo executado
     QThread *thread = QThread::currentThread();

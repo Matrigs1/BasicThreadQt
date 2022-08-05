@@ -4,8 +4,9 @@
 #include <QObject>
 #include <QThread>
 #include <QDebug>
+#include <QRunnable>
 
-class Task : public QObject
+class Task : public QObject, public QRunnable
 {
     Q_OBJECT
 public:
@@ -15,8 +16,11 @@ public:
 signals:
 
 public slots:
-    void work();
+    //void work();
 
+
+    // QRunnable interface
+    void run();
 };
 
 #endif // TASK_H
